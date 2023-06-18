@@ -1,0 +1,29 @@
+service: csv-to-json-service
+configValidationMode: error
+
+
+provider:
+  name: aws
+  runtime: python3.8
+  region: eu-west-2
+  layers:
+    - arn:aws:lambda:eu-west-2:336392948345:layer:AWSSDKPandas-Python38:7
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - s3:GetObject
+            - s3:PutObject
+          Resource: "arn:aws:s3:::bucket_name/*"
+
+
+functions:
+  convertCSVtoJSON:
+    handler: handler.lambda_handler
+    events:
+      - s3:
+          bucket: bucket_name
+          event: s3:ObjectCreated:*
+          rules:
+            - suffix: .csv
